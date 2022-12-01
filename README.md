@@ -11,7 +11,10 @@ You will need Python3 and a few libs that you can get with pip:
 pip install plyer
 pip install requests
 ```
-After this, simply do `python notifoot.py` and let it go!
+After this, simply do `python notifoot.py` and let it go!  
+
+⚠️ **NOTE**: if you are not in Europe (France), you may want to adjust `timeZone_sec` in line 14.  
+For example, if you are in the USA (EST), set this variable to -18000 (UTC-5). If you are in UAE (GST), set it to 14400 (UTC+4). 
 
 ## Why this project?
 Because I wanted to follow the matches without being noticed (and to be more productive).  
