@@ -13,56 +13,72 @@ periodRefresh = 15
 notifRefresh = 300
 timeZone_sec = 3600
 
-# notification.notify(
-#     title="notifoot",
-#     message="The program is up and running!",
-#     timeout=10
-# )
-
 # Useful variables (will be refreshed)
-# timeMatch = []
-# teamHome = []
-# teamAway = []
 scoreHome = []
 scoreAway = []
 dateOfStart = []
 lastNotif = 0
 
+
 def periodicNotif():
     messages = ""
     for i in range(len(timeMatch)):
-        messages = messages + "@ t = " + str(timeMatch[i]) + " : " + str(teamHome[i]) + " " + \
-                                str(scoreHome[i]) + " - " + \
-                                str(scoreAway[i]) + " " + str(teamAway[i]) + "\n"
+        if (timeMatch[i] is None):
+            messages = messages + str(teamHome[i]) + " vs " + str(
+                teamAway[i]) + " will start @ " + str(dateOfStart[i])[11:16] + " UTC\n"
+        elif (timeMatch[i] == "full-time"):
+            messages = messages + "Final score: " + str(teamHome[i]) + " " + \
+                str(scoreHome[i]) + " - " + \
+                str(scoreAway[i]) + " " + str(teamAway[i]) + "\n"
+        else:
+            messages = messages + "@ t = " + str(timeMatch[i]) + " : " + str(teamHome[i]) + " " + \
+                str(scoreHome[i]) + " - " + \
+                str(scoreAway[i]) + " " + str(teamAway[i]) + "\n"
     notification.notify(
         title="Match statuses:",
         # Sample msg: "@ t = 15': AAA 0 - 2 BBB"
-        message = messages,
+        message=messages,
         timeout=5
-        )
+    )
 
 
 def printScores():
     messages = ""
     for i in range(len(timeMatch)):
-        messages = messages + "@ t = " + str(timeMatch[i]) + " : " + str(teamHome[i]) + " " + \
-                                str(scoreHome[i]) + " - " + \
-                                str(scoreAway[i]) + " " + str(teamAway[i]) + "\n"
+        if (timeMatch[i] is None):
+            messages = messages + str(teamHome[i]) + " vs " + str(
+                teamAway[i]) + " will start @ " + str(dateOfStart[i])[11:16] + " UTC\n"
+        elif (timeMatch[i] == "full-time"):
+            messages = messages + "Final score: " + str(teamHome[i]) + " " + \
+                str(scoreHome[i]) + " - " + \
+                str(scoreAway[i]) + " " + str(teamAway[i]) + "\n"
+        else:
+            messages = messages + "@ t = " + str(timeMatch[i]) + " : " + str(teamHome[i]) + " " + \
+                str(scoreHome[i]) + " - " + \
+                str(scoreAway[i]) + " " + str(teamAway[i]) + "\n"
     print(messages)
 
 
 def goalNotif():
     messages = ""
     for i in range(len(timeMatch)):
-        messages =+ "@ t = " + str(timeMatch[i]) + "' : " + str(teamHome[i]) + " " + \
-                                str(scoreHome[i]) + " - " + \
-                                str(scoreAway[i]) + " " + str(teamAway[i]) + "\n"
+        if (timeMatch[i] is None):
+            messages = messages + str(teamHome[i]) + " vs " + str(
+                teamAway[i]) + " will start @ " + str(dateOfStart[i])[11:16] + " UTC\n"
+        elif (timeMatch[i] == "full-time"):
+            messages = messages + "Final score: " + str(teamHome[i]) + " " + \
+                str(scoreHome[i]) + " - " + \
+                str(scoreAway[i]) + " " + str(teamAway[i]) + "\n"
+        else:
+            messages = messages + "@ t = " + str(timeMatch[i]) + " : " + str(teamHome[i]) + " " + \
+                str(scoreHome[i]) + " - " + \
+                str(scoreAway[i]) + " " + str(teamAway[i]) + "\n"
 
     notification.notify(
         title="⚽ GOAAAAL!!!",
         # Sample msg: "@ t = 15': AAA 0 - 2 BBB"
-        message = messages,
-        timeout = 40
+        message=messages,
+        timeout=40
     )
 
 
@@ -72,7 +88,7 @@ def refreshScore():
     jsonData = json.loads(urlDump)
     # print(jsonData)
     nbMatches = len(jsonData)
-    print("I got", str(len(jsonData)), "matches to analyse!")
+    print("There are", str(len(jsonData)), "matches today!")
 
     for i in range(nbMatches):
         teamHome.append(jsonData[i]['home_team']['country'])
@@ -91,13 +107,14 @@ while (True):
     oldScoreHome = scoreHome
     oldScoreAway = scoreAway
     refreshScore()
-    dateOfStartEpoch = [dt.strptime(date, "%Y-%m-%dT%H:%M:%SZ").timestamp() for date in dateOfStart]
+    dateOfStartEpoch = [dt.strptime(
+        date, "%Y-%m-%dT%H:%M:%SZ").timestamp() for date in dateOfStart]
     printScores()
     # Do not do anything until start of match
     if (len(dateOfStartEpoch) == 0):
         print("No matches today. You can fully focus on your work!")
         time.sleep(7200)
-    elif (time.time() < (min(dateOfStartEpoch) + timeZone_sec)):
+    elif ((time.time() - 120) < (min(dateOfStartEpoch) + timeZone_sec)):
         timeToSleep = min(dateOfStartEpoch) - time.time() + timeZone_sec - 120
         print("First match starts at", str(min(dateOfStart)))
         print("Next match in", str(int(timeToSleep)), "sec: good nap!")
