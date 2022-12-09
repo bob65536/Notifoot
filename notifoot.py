@@ -17,6 +17,7 @@ timeZone_sec = 3600
 scoreHome = []
 scoreAway = []
 dateOfStart = []
+nothing = []
 lastNotif = 0
 
 
@@ -99,13 +100,23 @@ def refreshScore():
         dateOfStart.append(jsonData[i]['datetime'])
 
 
+def compareTables(T1, T2):
+    res = True
+    if len(T1) == len(T2):
+        for i in range(len(T1)):
+            res *= (T1[i] == T2[i])
+    else:
+        res = False
+    return res
+
+
 while (True):
-    timeMatch = []
-    teamHome = []
-    teamAway = []
-    dateOfStart = []
-    oldScoreHome = scoreHome
-    oldScoreAway = scoreAway
+    timeMatch = nothing.copy()
+    teamHome = nothing.copy()
+    teamAway = nothing.copy()
+    dateOfStart = nothing.copy()
+    oldScoreHome = scoreHome.copy()
+    oldScoreAway = scoreAway.copy()
     refreshScore()
     dateOfStartEpoch = [dt.strptime(
         date, "%Y-%m-%dT%H:%M:%SZ").timestamp() for date in dateOfStart]
@@ -118,12 +129,14 @@ while (True):
         timeToSleep = min(dateOfStartEpoch) - time.time() + timeZone_sec - 120
         print("First match starts at", str(min(dateOfStart)))
         print("Next match in", str(int(timeToSleep)), "sec: good nap!")
-        time.sleep(timeToSleep)
+        if (timeToSleep > 0):
+            time.sleep(timeToSleep)
     else:
-        if ((oldScoreHome == scoreHome) and (oldScoreAway == scoreAway)):
+        if ((compareTables(oldScoreHome, scoreHome)) and (compareTables(oldScoreAway, scoreAway))) == False:
             if ((time.time() - lastNotif) > notifRefresh):
                 periodicNotif()
                 lastNotif = time.time()
         else:
             goalNotif()
         time.sleep(periodRefresh)
+
