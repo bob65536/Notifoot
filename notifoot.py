@@ -9,7 +9,7 @@ import time
 from datetime import datetime as dt
 
 # Constants
-periodRefresh = 15
+periodRefresh = 10
 notifRefresh = 300
 timeZone_sec = 3600
 
@@ -19,6 +19,7 @@ scoreAway = []
 dateOfStart = []
 nothing = []
 lastNotif = 0
+firstRun = True
 
 
 def periodicNotif():
@@ -79,18 +80,22 @@ def goalNotif():
         title="⚽ GOAAAAL!!!",
         # Sample msg: "@ t = 15': AAA 0 - 2 BBB"
         message=messages,
-        timeout=40
+        timeout=30
     )
 
 
 def refreshScore():
     apiUrl = "https://worldcupjson.net/matches/today?by_date=asc"
     urlDump = requests.get(apiUrl).text
+    # Debug code.
+    # jsonPath = "test.json"
+    # with open(jsonPath, "r") as f:
+    #     fileDump = f.readlines()
+    # urlDump = ""
+    # for line in fileDump:
+    #     urlDump += line
     jsonData = json.loads(urlDump)
-    # print(jsonData)
     nbMatches = len(jsonData)
-    print("There are", str(len(jsonData)), "matches today!")
-
     for i in range(nbMatches):
         teamHome.append(jsonData[i]['home_team']['country'])
         teamAway.append(jsonData[i]['away_team']['country'])
@@ -101,6 +106,7 @@ def refreshScore():
 
 
 def compareTables(T1, T2):
+    """ True if Same size and same values """
     res = True
     if len(T1) == len(T2):
         for i in range(len(T1)):
@@ -111,12 +117,14 @@ def compareTables(T1, T2):
 
 
 while (True):
-    timeMatch = nothing.copy()
-    teamHome = nothing.copy()
-    teamAway = nothing.copy()
-    dateOfStart = nothing.copy()
-    oldScoreHome = scoreHome.copy()
-    oldScoreAway = scoreAway.copy()
+    timeMatch = []
+    teamHome = []
+    teamAway = []
+    dateOfStart = []
+    oldScoreHome = [x for x in scoreHome]
+    oldScoreAway = [x for x in scoreAway]
+    scoreHome = []
+    scoreAway = []
     refreshScore()
     dateOfStartEpoch = [dt.strptime(
         date, "%Y-%m-%dT%H:%M:%SZ").timestamp() for date in dateOfStart]
@@ -132,11 +140,15 @@ while (True):
         if (timeToSleep > 0):
             time.sleep(timeToSleep)
     else:
-        if ((compareTables(oldScoreHome, scoreHome)) and (compareTables(oldScoreAway, scoreAway))) == False:
+        # True if same score, False if evolution
+        areTheScoresTheSame = compareTables(
+            oldScoreHome, scoreHome) * compareTables(oldScoreAway, scoreAway)
+        if (areTheScoresTheSame > 0) or (firstRun is True):
             if ((time.time() - lastNotif) > notifRefresh):
                 periodicNotif()
                 lastNotif = time.time()
         else:
+            # Different score: flash notif
             goalNotif()
         time.sleep(periodRefresh)
-
+    firstRun = False
