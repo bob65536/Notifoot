@@ -13,6 +13,9 @@ pip install requests
 ```
 After this, simply do `python notifoot.py` and let it go!  
 
+You can enable SMS notification: if you have Free Mobile, follow the instructions [here](https://www.prodigemobile.com/tutoriel/service-notification-sms-free-mobile/) and copy the link in the `key` file (or create one such file): it should look like `https://smsapi.free-mobile.fr/sendmsg?user=12345678&pass=xxxxxxxxxxxxxx&msg=` (erase what's after `msg=`).  
+The link you have is personal and should not be shared to the Internet!  
+
 ⚠️ **NOTE**: if you are not in Europe (France), you may want to adjust `timeZone_sec` in line 14.  
 For example, if you are in the USA (EST), set this variable to -18000 (UTC-5). If you are in UAE (GST), set it to 14400 (UTC+4). 
 

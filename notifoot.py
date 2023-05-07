@@ -22,6 +22,15 @@ lastNotif = 0
 firstRun = True
 
 
+def sendSMS(msg):
+    if (enableSMSFeature):
+        with open("key", "r") as f:
+            urlToGo = f.readline().translate(str.maketrans('', '', ' \n\t\r'))
+        urlToGo = urlToGo + msg
+        f = requests.get(urlToGo)
+        print(urlToGo)
+
+
 def periodicNotif():
     messages = ""
     for i in range(len(timeMatch)):
@@ -76,6 +85,8 @@ def goalNotif():
                 str(scoreHome[i]) + " - " + \
                 str(scoreAway[i]) + " " + str(teamAway[i]) + "\n"
 
+    sendSMS(messages)
+
     notification.notify(
         title="⚽ GOAAAAL!!!",
         # Sample msg: "@ t = 15': AAA 0 - 2 BBB"
@@ -116,6 +127,14 @@ def compareTables(T1, T2):
     return res
 
 
+try:
+    enableSMSFeature = True
+    sendSMS("Bonjour ! Le programme est lancé !")
+except KeyboardInterrupt:
+    print("Unable to notify by SMS. This feature is disabled.")
+    print("It is only available for people with Free Mobile carrier. \nTo use this feature, check this link: https://www.prodigemobile.com/tutoriel/service-notification-sms-free-mobile/ (in French)")
+    print("Then, copy the given link in a file named key (no extension) in the same level as the script. Once done, rerun this script.")
+    enableSMSFeature = False
 while (True):
     timeMatch = []
     teamHome = []
